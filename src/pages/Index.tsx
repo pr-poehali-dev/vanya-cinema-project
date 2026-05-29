@@ -70,8 +70,8 @@ const DAY_NAMES_SHORT = ["вс", "пн", "вт", "ср", "чт", "пт", "сб"]
 const DAY_NAMES_FULL = ["воскресенье", "понедельник", "вторник", "среду", "четверг", "пятницу", "субботу"];
 const MONTHS_SHORT = ["янв", "фев", "мар", "апр", "май", "июн", "июл", "авг", "сен", "окт", "ноя", "дек"];
 
-// Сеансы каждые 2 дня начиная с 31 мая 2025
-const FIXIKI_START = new Date(2025, 4, 31); // 31 мая 2025
+// Сеансы каждые 2 дня начиная с 1 июня 2025 (вс)
+const FIXIKI_START = new Date(2025, 5, 1); // 1 июня 2025
 
 function getNextFixikiSession(sessionTime: string, now: Date): { date: Date; isToday: boolean } {
   const [h, m] = sessionTime.split(":").map(Number);
