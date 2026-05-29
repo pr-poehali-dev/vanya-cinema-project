@@ -4,6 +4,22 @@
 
 @layer base {
   :root {
+    /* Cinema theme */
+    --bg-main: #f0f4ff;
+    --header-bg: #1a1a6e;
+    --hero-from: #1a1a6e;
+    --hero-to: #3b1fa8;
+    --section-alt-bg: #eef0ff;
+    --card-bg: #ffffff;
+    --card-border: #e0e4f8;
+    --text-heading: #1a1a6e;
+    --text-body: #444466;
+    --text-muted: #8888aa;
+    --accent-yellow: #ffd600;
+    --accent-pink: #e91e63;
+    --accent-blue: #2196f3;
+    --accent-purple: #9c27b0;
+
     --background: 0 0% 100%;
     --foreground: 222.2 84% 4.9%;
 
@@ -97,5 +113,6 @@
 
   body {
     @apply bg-background text-foreground;
+    font-family: "Nunito", sans-serif;
   }
 }
