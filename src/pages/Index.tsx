@@ -21,7 +21,7 @@ const films = [
     afishaUrl: "https://afisha.yandex.ru/moscow/film/fiksiki-protiv-krabotov",
     description: "Фиксики – маленькие добрые человечки, которые живут в машинах и приборах и заботятся о технике. В лаборатории профессора Чудакова находится школа фиксиков, о которой знают только мальчик ДимДимыч и его подруга Катя. Но однажды там появляются неуловимые существа — роботы-кработы. Кто они и кто стоит за ними? Новые друзья Мега и Альт придут на помощь, и все попадут в невероятный водоворот приключений!",
     sessions: [
-      { date: "today", time: "18:00", isToday: true },
+      { date: "sunday", time: "18:00", isToday: false },
     ],
   },
   {
@@ -64,6 +64,20 @@ function formatDate(date: Date): string {
 
 function formatTime(date: Date): string {
   return date.toLocaleTimeString("ru-RU", { hour: "2-digit", minute: "2-digit", second: "2-digit" });
+}
+
+function getNextSundayDate(): string {
+  const today = new Date();
+  const day = today.getDay();
+  const daysUntilSunday = day === 0 ? 7 : 7 - day;
+  const sunday = new Date(today);
+  sunday.setDate(today.getDate() + daysUntilSunday);
+  const months = ["янв", "фев", "мар", "апр", "май", "июн", "июл", "авг", "сен", "окт", "ноя", "дек"];
+  return `${sunday.getDate()} ${months[sunday.getMonth()]} (вс)`;
+}
+
+function isTodaySunday(): boolean {
+  return new Date().getDay() === 0;
 }
 
 function getTomorrowDate(): string {
@@ -272,28 +286,41 @@ export default function Index() {
 
                     {film.sessions.map((session, i) => {
                       const [h, m] = session.time.split(":").map(Number);
-                      const sessionPassed = session.isToday && (now.getHours() > h || (now.getHours() === h && now.getMinutes() >= m));
-                      const showAsTomorrow = sessionPassed;
+                      const isSunday = session.date === "sunday";
+                      const isTomorrow = session.date === "tomorrow";
+                      const isToday = session.date === "today";
+                      const sessionPassed = isToday && (now.getHours() > h || (now.getHours() === h && now.getMinutes() >= m));
+                      const sundayPassed = isSunday && isTodaySunday() && (now.getHours() > h || (now.getHours() === h && now.getMinutes() >= m));
+
+                      let dateLabel = "";
+                      if (sessionPassed) dateLabel = `Следующий сеанс завтра, ${getTomorrowDate()}`;
+                      else if (sundayPassed) dateLabel = `Следующий сеанс в воскресенье, ${getNextSundayDate()}`;
+                      else if (isToday) dateLabel = `Сегодня, ${getTodayDate()}`;
+                      else if (isTomorrow) dateLabel = `Завтра, ${getTomorrowDate()}`;
+                      else if (isSunday) dateLabel = isTodaySunday() ? `Сегодня (вс), ${getTodayDate()}` : `В воскресенье, ${getNextSundayDate()}`;
+
+                      const isPast = sessionPassed || sundayPassed;
+
                       return (
                         <div key={i} className="mb-2">
                           <div className="text-xs font-semibold mb-1" style={{ color: "var(--text-muted)" }}>
-                            {showAsTomorrow ? `Следующий сеанс завтра, ${getTomorrowDate()}` : session.isToday ? `Сегодня, ${getTodayDate()}` : `Завтра, ${getTomorrowDate()}`}
+                            {dateLabel}
                           </div>
-                          {showAsTomorrow ? (
+                          {isPast ? (
                             <div
                               className="flex items-center gap-2 px-4 py-2 rounded-xl font-bold text-sm w-full justify-center"
                               style={{ background: "var(--section-alt-bg)", color: "var(--text-muted)", border: "2px dashed var(--card-border)" }}
                             >
                               <Icon name="Clock" size={16} />
-                              Сеанс завтра в {session.time}
+                              Следующий сеанс в {session.time}
                             </div>
                           ) : (
                             <button
                               className="flex items-center gap-2 px-4 py-2 rounded-xl font-bold text-sm transition-all hover:scale-105 w-full justify-center"
                               style={{
-                                background: session.isToday ? "var(--accent-pink)" : "var(--accent-blue)",
+                                background: isToday || (isSunday && isTodaySunday()) ? "var(--accent-pink)" : "var(--accent-blue)",
                                 color: "#fff",
-                                boxShadow: session.isToday ? "0 4px 14px rgba(233,30,99,0.4)" : "0 4px 14px rgba(33,150,243,0.4)",
+                                boxShadow: isToday || (isSunday && isTodaySunday()) ? "0 4px 14px rgba(233,30,99,0.4)" : "0 4px 14px rgba(33,150,243,0.4)",
                               }}
                               onClick={(e) => { e.stopPropagation(); openBuyTicket(film.afishaUrl); }}
                             >
