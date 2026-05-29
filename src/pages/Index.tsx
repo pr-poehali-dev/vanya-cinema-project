@@ -106,6 +106,9 @@ function formatSessionDate(date: Date, isToday: boolean): string {
   const tomorrow = new Date();
   tomorrow.setDate(tomorrow.getDate() + 1);
   if (date.toDateString() === tomorrow.toDateString()) return `Завтра, ${d} ${mon} (${dayShort})`;
+  const dayAfterTomorrow = new Date();
+  dayAfterTomorrow.setDate(dayAfterTomorrow.getDate() + 2);
+  if (date.toDateString() === dayAfterTomorrow.toDateString()) return `Послезавтра, ${d} ${mon} (${dayShort})`;
   return `В ${dayFull}, ${d} ${mon} (${dayShort})`;
 }
 
