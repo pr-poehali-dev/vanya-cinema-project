@@ -70,8 +70,8 @@ const DAY_NAMES_SHORT = ["вс", "пн", "вт", "ср", "чт", "пт", "сб"]
 const DAY_NAMES_FULL = ["воскресенье", "понедельник", "вторник", "среду", "четверг", "пятницу", "субботу"];
 const MONTHS_SHORT = ["янв", "фев", "мар", "апр", "май", "июн", "июл", "авг", "сен", "окт", "ноя", "дек"];
 
-// Вторник=2, Четверг=4, Суббота=6
-const FIXIKI_DAYS = [2, 4, 6];
+// Воскресенье=0, Вторник=2, Четверг=4, Суббота=6
+const FIXIKI_DAYS = [0, 2, 4, 6];
 
 function getNextSessionDate(allowedDays: number[], sessionTime: string, now: Date): { date: Date; isToday: boolean } {
   const [h, m] = sessionTime.split(":").map(Number);
