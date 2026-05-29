@@ -18,6 +18,7 @@ const films = [
     rating: "0+",
     ratingColor: "#4CAF50",
     poster: FIXIKI_POSTER,
+    afishaUrl: "https://afisha.yandex.ru/moscow/film/fiksiki-protiv-krabotov",
     description: "Маленькие починяторы Нолик и Симка сталкиваются с армией жутких роботов-Кработов. Весёлое приключение для всей семьи!",
     sessions: [
       { date: "today", time: "18:00", isToday: true },
@@ -33,6 +34,7 @@ const films = [
     rating: "6+",
     ratingColor: "#FF9800",
     poster: SMESHARIKI_POSTER,
+    afishaUrl: "https://afisha.yandex.ru/moscow/film/smeshariki-nachalo",
     description: "История о том, как появились любимые круглые друзья — Крош, Нюша, Ёжик и другие. Волшебная сказка о дружбе и приключениях!",
     sessions: [
       { date: "tomorrow", time: "18:00", isToday: false },
@@ -83,8 +85,8 @@ function scrollTo(id: string) {
   document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
 }
 
-function openBuyTicket(filmTitle: string) {
-  alert(`Покупка билета на фильм «${filmTitle}» — функция появится совсем скоро! 🎬`);
+function openBuyTicket(afishaUrl: string) {
+  window.open(afishaUrl, "_blank");
 }
 
 export default function Index() {
@@ -242,7 +244,7 @@ export default function Index() {
                 key={film.id}
                 className="rounded-3xl overflow-hidden shadow-lg transition-all hover:scale-[1.02] hover:shadow-2xl cursor-pointer"
                 style={{ background: "var(--card-bg)", border: "2px solid var(--card-border)" }}
-                onClick={() => openBuyTicket(film.title)}
+                onClick={() => openBuyTicket(film.afishaUrl)}
               >
                 <div className="flex gap-4 p-5">
                   <img
@@ -285,7 +287,7 @@ export default function Index() {
                               ? "0 4px 14px rgba(233,30,99,0.4)"
                               : "0 4px 14px rgba(33,150,243,0.4)",
                           }}
-                          onClick={(e) => { e.stopPropagation(); openBuyTicket(film.title); }}
+                          onClick={(e) => { e.stopPropagation(); openBuyTicket(film.afishaUrl); }}
                         >
                           <Icon name="Ticket" size={16} />
                           {session.time} — Купить билет
@@ -313,7 +315,7 @@ export default function Index() {
                 key={film.id}
                 className="rounded-3xl overflow-hidden shadow-xl transition-all hover:scale-[1.01] cursor-pointer"
                 style={{ background: "var(--card-bg)", border: "2px solid var(--card-border)" }}
-                onClick={() => openBuyTicket(film.title)}
+                onClick={() => openBuyTicket(film.afishaUrl)}
               >
                 <div className="relative">
                   <img
@@ -358,7 +360,7 @@ export default function Index() {
                       color: "#fff",
                       boxShadow: "0 4px 18px rgba(233,30,99,0.35)",
                     }}
-                    onClick={(e) => { e.stopPropagation(); openBuyTicket(film.title); }}
+                    onClick={(e) => { e.stopPropagation(); openBuyTicket(film.afishaUrl); }}
                   >
                     🎟 Купить билет
                   </button>
