@@ -70,27 +70,30 @@ const DAY_NAMES_SHORT = ["вс", "пн", "вт", "ср", "чт", "пт", "сб"]
 const DAY_NAMES_FULL = ["воскресенье", "понедельник", "вторник", "среду", "четверг", "пятницу", "субботу"];
 const MONTHS_SHORT = ["янв", "фев", "мар", "апр", "май", "июн", "июл", "авг", "сен", "окт", "ноя", "дек"];
 
-// Воскресенье=0, Вторник=2, Четверг=4, Суббота=6
-const FIXIKI_DAYS = [0, 2, 4, 6];
+// Сеансы каждые 2 дня начиная с 31 мая 2025
+const FIXIKI_START = new Date(2025, 4, 31); // 31 мая 2025
 
-function getNextSessionDate(allowedDays: number[], sessionTime: string, now: Date): { date: Date; isToday: boolean } {
+function getNextFixikiSession(sessionTime: string, now: Date): { date: Date; isToday: boolean } {
   const [h, m] = sessionTime.split(":").map(Number);
-  const today = now.getDay();
-  const todayIdx = allowedDays.indexOf(today);
+  const todayMidnight = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const startMidnight = new Date(FIXIKI_START.getFullYear(), FIXIKI_START.getMonth(), FIXIKI_START.getDate());
+  const diffDays = Math.floor((todayMidnight.getTime() - startMidnight.getTime()) / 86400000);
   const timePassed = now.getHours() > h || (now.getHours() === h && now.getMinutes() >= m);
 
-  if (todayIdx !== -1 && !timePassed) {
-    return { date: now, isToday: true };
+  // Если сегодня день сеанса (чётный от старта) и время ещё не прошло
+  if (diffDays >= 0 && diffDays % 2 === 0 && !timePassed) {
+    return { date: todayMidnight, isToday: true };
   }
 
-  let daysAhead = 8;
-  for (const d of allowedDays) {
-    let diff = d - today;
-    if (diff < 0 || (diff === 0 && timePassed)) diff += 7;
-    if (diff > 0 && diff < daysAhead) daysAhead = diff;
+  // Ищем следующий сеанс
+  const remainder = diffDays % 2;
+  let daysAhead = remainder === 0 ? 2 : (2 - remainder);
+  if (diffDays < 0) {
+    // Ещё не началось — ждём старта
+    daysAhead = -diffDays;
   }
-  const next = new Date(now);
-  next.setDate(now.getDate() + daysAhead);
+  const next = new Date(todayMidnight);
+  next.setDate(todayMidnight.getDate() + daysAhead);
   return { date: next, isToday: false };
 }
 
@@ -317,7 +320,7 @@ export default function Index() {
                       let isSessionToday = false;
 
                       if (isRecurring) {
-                        const next = getNextSessionDate(FIXIKI_DAYS, session.time, now);
+                        const next = getNextFixikiSession(session.time, now);
                         dateLabel = formatSessionDate(next.date, next.isToday);
                         isSessionToday = next.isToday;
                       } else if (isToday) {
