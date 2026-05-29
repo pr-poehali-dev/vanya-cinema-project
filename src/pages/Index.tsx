@@ -37,7 +37,7 @@ const films = [
     afishaUrl: "https://afisha.yandex.ru/moscow/film/smeshariki-nachalo",
     description: "Такую экстремальную историю про Смешариков вы не могли себе представить: покинув свою уютную страну, Смешарики оказываются в современном мегаполисе в роли супергероев! Они приняли очень важное решение — спасти мир от нависшей угрозы. Этот «ответственный» шаг приводит к самому захватывающему приключению в их жизни!",
     sessions: [
-      { date: "tomorrow", time: "18:00", isToday: false },
+      { date: "2025-05-31", time: "18:00", isToday: false },
     ],
   },
 ];
@@ -311,8 +311,7 @@ export default function Index() {
 
                     {film.sessions.map((session, i) => {
                       const isRecurring = session.date === "recurring";
-                      const isTomorrow = session.date === "tomorrow";
-                      const isToday = session.date === "today";
+                      const isFixedDate = session.date.match(/^\d{4}-\d{2}-\d{2}$/);
                       const [h, m] = session.time.split(":").map(Number);
 
                       let dateLabel = "";
@@ -323,13 +322,20 @@ export default function Index() {
                         const next = getNextFixikiSession(session.time, now);
                         dateLabel = formatSessionDate(next.date, next.isToday);
                         isSessionToday = next.isToday;
-                      } else if (isToday) {
+                      } else if (isFixedDate) {
+                        const [y, mo, d] = session.date.split("-").map(Number);
+                        const sessionDate = new Date(y, mo - 1, d);
+                        const todayMidnight = new Date(now.getFullYear(), now.getMonth(), now.getDate());
                         const timePassed = now.getHours() > h || (now.getHours() === h && now.getMinutes() >= m);
-                        isPast = timePassed;
-                        isSessionToday = !timePassed;
-                        dateLabel = timePassed ? `Следующий сеанс завтра, ${getTomorrowDate()}` : `Сегодня, ${getTodayDate()}`;
-                      } else if (isTomorrow) {
-                        dateLabel = `Завтра, ${getTomorrowDate()}`;
+                        const isDateToday = sessionDate.getTime() === todayMidnight.getTime();
+                        const isDatePast = sessionDate.getTime() < todayMidnight.getTime() || (isDateToday && timePassed);
+                        isPast = isDatePast;
+                        isSessionToday = isDateToday && !timePassed;
+                        if (isDatePast) {
+                          dateLabel = "Сеанс уже прошёл";
+                        } else {
+                          dateLabel = formatSessionDate(sessionDate, isDateToday);
+                        }
                       }
 
                       return (
