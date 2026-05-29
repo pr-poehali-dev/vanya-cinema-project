@@ -12,7 +12,7 @@ const films = [
     id: 1,
     title: "Фиксики против Кработов",
     year: 2019,
-    genre: "Анимация, комедия",
+    genre: "Анимация, музыка",
     country: "Россия",
     duration: "80 мин",
     rating: "0+",
@@ -28,7 +28,7 @@ const films = [
     id: 2,
     title: "Смешарики. Начало",
     year: 2011,
-    genre: "Анимация, музыка",
+    genre: "Анимация, комедия",
     country: "Россия",
     duration: "86 мин",
     rating: "6+",
@@ -270,30 +270,40 @@ export default function Index() {
                       </p>
                     </div>
 
-                    {film.sessions.map((session, i) => (
-                      <div key={i} className="mb-2">
-                        <div
-                          className="text-xs font-semibold mb-1"
-                          style={{ color: "var(--text-muted)" }}
-                        >
-                          {session.isToday ? `Сегодня, ${getTodayDate()}` : `Завтра, ${getTomorrowDate()}`}
+                    {film.sessions.map((session, i) => {
+                      const [h, m] = session.time.split(":").map(Number);
+                      const sessionPassed = session.isToday && (now.getHours() > h || (now.getHours() === h && now.getMinutes() >= m));
+                      const showAsTomorrow = sessionPassed;
+                      return (
+                        <div key={i} className="mb-2">
+                          <div className="text-xs font-semibold mb-1" style={{ color: "var(--text-muted)" }}>
+                            {showAsTomorrow ? `Следующий сеанс завтра, ${getTomorrowDate()}` : session.isToday ? `Сегодня, ${getTodayDate()}` : `Завтра, ${getTomorrowDate()}`}
+                          </div>
+                          {showAsTomorrow ? (
+                            <div
+                              className="flex items-center gap-2 px-4 py-2 rounded-xl font-bold text-sm w-full justify-center"
+                              style={{ background: "var(--section-alt-bg)", color: "var(--text-muted)", border: "2px dashed var(--card-border)" }}
+                            >
+                              <Icon name="Clock" size={16} />
+                              Сеанс завтра в {session.time}
+                            </div>
+                          ) : (
+                            <button
+                              className="flex items-center gap-2 px-4 py-2 rounded-xl font-bold text-sm transition-all hover:scale-105 w-full justify-center"
+                              style={{
+                                background: session.isToday ? "var(--accent-pink)" : "var(--accent-blue)",
+                                color: "#fff",
+                                boxShadow: session.isToday ? "0 4px 14px rgba(233,30,99,0.4)" : "0 4px 14px rgba(33,150,243,0.4)",
+                              }}
+                              onClick={(e) => { e.stopPropagation(); openBuyTicket(film.afishaUrl); }}
+                            >
+                              <Icon name="Ticket" size={16} />
+                              {session.time} — Купить билет
+                            </button>
+                          )}
                         </div>
-                        <button
-                          className="flex items-center gap-2 px-4 py-2 rounded-xl font-bold text-sm transition-all hover:scale-105 w-full justify-center"
-                          style={{
-                            background: session.isToday ? "var(--accent-pink)" : "var(--accent-blue)",
-                            color: "#fff",
-                            boxShadow: session.isToday
-                              ? "0 4px 14px rgba(233,30,99,0.4)"
-                              : "0 4px 14px rgba(33,150,243,0.4)",
-                          }}
-                          onClick={(e) => { e.stopPropagation(); openBuyTicket(film.afishaUrl); }}
-                        >
-                          <Icon name="Ticket" size={16} />
-                          {session.time} — Купить билет
-                        </button>
-                      </div>
-                    ))}
+                      );
+                    })}
                   </div>
                 </div>
               </div>
