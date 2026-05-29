@@ -4,8 +4,8 @@ import Icon from "@/components/ui/icon";
 const FIXIKI_POSTER = "https://cdn.poehali.dev/projects/4c88fe95-a6ad-422a-8d6e-050f43cf5b03/bucket/1a79c0b5-7764-4aca-93cd-c171cc8d752c.jpg";
 const SMESHARIKI_POSTER = "https://cdn.poehali.dev/projects/4c88fe95-a6ad-422a-8d6e-050f43cf5b03/bucket/4e93e5d5-9327-4b73-b0eb-a667638ccd07.jpg";
 
-const CINEMA_ADDRESS = "Кинотеатр Вани";
-const YANDEX_MAPS_URL = "https://yandex.ru/maps/?text=кинотеатр";
+const CINEMA_ADDRESS = "Тамбов, Мичуринская ул., д. 203, подъезд 3, этаж 5, кв. 100";
+const YANDEX_MAPS_URL = "https://yandex.ru/maps/?text=Тамбов%2C+Мичуринская+улица%2C+203";
 
 const films = [
   {
@@ -403,6 +403,14 @@ export default function Index() {
                   <div className="text-xs" style={{ color: "var(--text-muted)" }}>{item.sub}</div>
                 </div>
               ))}
+            </div>
+
+            <div
+              className="flex items-center justify-center gap-2 mb-5 px-4 py-3 rounded-2xl text-sm font-semibold"
+              style={{ background: "var(--section-alt-bg)", color: "var(--text-body)" }}
+            >
+              <Icon name="MapPin" size={16} style={{ color: "var(--accent-pink)", flexShrink: 0 }} />
+              {CINEMA_ADDRESS}
             </div>
 
             <button
