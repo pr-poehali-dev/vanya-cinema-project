@@ -225,7 +225,7 @@ export default function Index() {
             </div>
             <div className="flex items-center gap-1.5">
               <Icon name="Star" size={16} />
-              Ежедневно
+              пн — вс
             </div>
           </div>
         </div>
@@ -388,7 +388,7 @@ export default function Index() {
 
             <div className="grid grid-cols-3 gap-4 mb-6">
               {[
-                { icon: "Clock", label: "10:00 — 23:00", sub: "Ежедневно" },
+                { icon: "Clock", label: "10:00 — 23:00", sub: "пн — вс" },
                 { icon: "Star", label: "Семейный", sub: "кинотеатр" },
                 { icon: "Heart", label: "Уютный зал", sub: "для детей" },
               ].map((item, i) => (
@@ -432,7 +432,7 @@ export default function Index() {
       {/* FOOTER */}
       <footer className="py-6 px-4 text-center" style={{ background: "var(--header-bg)" }}>
         <div className="text-white/60 text-sm font-semibold">
-          © 2024 Кинотеатр Вани · Работаем ежедневно с 10:00 до 23:00
+          © 2024 Кинотеатр Вани · Работаем пн — вс с 10:00 до 23:00
         </div>
       </footer>
 
