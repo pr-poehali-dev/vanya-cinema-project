@@ -21,7 +21,7 @@ const films = [
     afishaUrl: "https://afisha.yandex.ru/moscow/film/fiksiki-protiv-krabotov",
     description: "Фиксики – маленькие добрые человечки, которые живут в машинах и приборах и заботятся о технике. В лаборатории профессора Чудакова находится школа фиксиков, о которой знают только мальчик ДимДимыч и его подруга Катя. Но однажды там появляются неуловимые существа — роботы-кработы. Кто они и кто стоит за ними? Новые друзья Мега и Альт придут на помощь, и все попадут в невероятный водоворот приключений!",
     sessions: [
-      { date: "tuesday", time: "18:00", isToday: false },
+      { date: "recurring", time: "18:00", isToday: false },
     ],
   },
   {
@@ -66,33 +66,55 @@ function formatTime(date: Date): string {
   return date.toLocaleTimeString("ru-RU", { hour: "2-digit", minute: "2-digit", second: "2-digit" });
 }
 
-function getNextSundayDate(): string {
-  const today = new Date();
-  const day = today.getDay();
-  const daysUntilSunday = day === 0 ? 7 : 7 - day;
-  const sunday = new Date(today);
-  sunday.setDate(today.getDate() + daysUntilSunday);
-  const months = ["янв", "фев", "мар", "апр", "май", "июн", "июл", "авг", "сен", "окт", "ноя", "дек"];
-  return `${sunday.getDate()} ${months[sunday.getMonth()]} (вс)`;
+const DAY_NAMES_SHORT = ["вс", "пн", "вт", "ср", "чт", "пт", "сб"];
+const DAY_NAMES_FULL = ["воскресенье", "понедельник", "вторник", "среду", "четверг", "пятницу", "субботу"];
+const MONTHS_SHORT = ["янв", "фев", "мар", "апр", "май", "июн", "июл", "авг", "сен", "окт", "ноя", "дек"];
+
+// Вторник=2, Четверг=4, Суббота=6
+const FIXIKI_DAYS = [2, 4, 6];
+
+function getNextSessionDate(allowedDays: number[], sessionTime: string, now: Date): { date: Date; isToday: boolean } {
+  const [h, m] = sessionTime.split(":").map(Number);
+  const today = now.getDay();
+  const todayIdx = allowedDays.indexOf(today);
+  const timePassed = now.getHours() > h || (now.getHours() === h && now.getMinutes() >= m);
+
+  if (todayIdx !== -1 && !timePassed) {
+    return { date: now, isToday: true };
+  }
+
+  let daysAhead = 8;
+  for (const d of allowedDays) {
+    let diff = d - today;
+    if (diff < 0 || (diff === 0 && timePassed)) diff += 7;
+    if (diff > 0 && diff < daysAhead) daysAhead = diff;
+  }
+  const next = new Date(now);
+  next.setDate(now.getDate() + daysAhead);
+  return { date: next, isToday: false };
 }
 
-function isTodaySunday(): boolean {
-  return new Date().getDay() === 0;
+function formatSessionDate(date: Date, isToday: boolean): string {
+  const dayShort = DAY_NAMES_SHORT[date.getDay()];
+  const dayFull = DAY_NAMES_FULL[date.getDay()];
+  const d = date.getDate();
+  const mon = MONTHS_SHORT[date.getMonth()];
+  if (isToday) return `Сегодня, ${d} ${mon} (${dayShort})`;
+  const tomorrow = new Date();
+  tomorrow.setDate(tomorrow.getDate() + 1);
+  if (date.toDateString() === tomorrow.toDateString()) return `Завтра, ${d} ${mon} (${dayShort})`;
+  return `В ${dayFull}, ${d} ${mon} (${dayShort})`;
 }
 
 function getTomorrowDate(): string {
   const tomorrow = new Date();
   tomorrow.setDate(tomorrow.getDate() + 1);
-  const days = ["вс", "пн", "вт", "ср", "чт", "пт", "сб"];
-  const months = ["янв", "фев", "мар", "апр", "май", "июн", "июл", "авг", "сен", "окт", "ноя", "дек"];
-  return `${tomorrow.getDate()} ${months[tomorrow.getMonth()]} (${days[tomorrow.getDay()]})`;
+  return `${tomorrow.getDate()} ${MONTHS_SHORT[tomorrow.getMonth()]} (${DAY_NAMES_SHORT[tomorrow.getDay()]})`;
 }
 
 function getTodayDate(): string {
   const today = new Date();
-  const days = ["вс", "пн", "вт", "ср", "чт", "пт", "сб"];
-  const months = ["янв", "фев", "мар", "апр", "май", "июн", "июл", "авг", "сен", "окт", "ноя", "дек"];
-  return `${today.getDate()} ${months[today.getMonth()]} (${days[today.getDay()]})`;
+  return `${today.getDate()} ${MONTHS_SHORT[today.getMonth()]} (${DAY_NAMES_SHORT[today.getDay()]})`;
 }
 
 function scrollTo(id: string) {
@@ -285,21 +307,27 @@ export default function Index() {
                     </div>
 
                     {film.sessions.map((session, i) => {
-                      const [h, m] = session.time.split(":").map(Number);
-                      const isSunday = session.date === "sunday";
+                      const isRecurring = session.date === "recurring";
                       const isTomorrow = session.date === "tomorrow";
                       const isToday = session.date === "today";
-                      const sessionPassed = isToday && (now.getHours() > h || (now.getHours() === h && now.getMinutes() >= m));
-                      const sundayPassed = isSunday && isTodaySunday() && (now.getHours() > h || (now.getHours() === h && now.getMinutes() >= m));
+                      const [h, m] = session.time.split(":").map(Number);
 
                       let dateLabel = "";
-                      if (sessionPassed) dateLabel = `Следующий сеанс завтра, ${getTomorrowDate()}`;
-                      else if (sundayPassed) dateLabel = `Следующий сеанс в воскресенье, ${getNextSundayDate()}`;
-                      else if (isToday) dateLabel = `Сегодня, ${getTodayDate()}`;
-                      else if (isTomorrow) dateLabel = `Завтра, ${getTomorrowDate()}`;
-                      else if (isSunday) dateLabel = isTodaySunday() ? `Сегодня (вс), ${getTodayDate()}` : `В воскресенье, ${getNextSundayDate()}`;
+                      let isPast = false;
+                      let isSessionToday = false;
 
-                      const isPast = sessionPassed || sundayPassed;
+                      if (isRecurring) {
+                        const next = getNextSessionDate(FIXIKI_DAYS, session.time, now);
+                        dateLabel = formatSessionDate(next.date, next.isToday);
+                        isSessionToday = next.isToday;
+                      } else if (isToday) {
+                        const timePassed = now.getHours() > h || (now.getHours() === h && now.getMinutes() >= m);
+                        isPast = timePassed;
+                        isSessionToday = !timePassed;
+                        dateLabel = timePassed ? `Следующий сеанс завтра, ${getTomorrowDate()}` : `Сегодня, ${getTodayDate()}`;
+                      } else if (isTomorrow) {
+                        dateLabel = `Завтра, ${getTomorrowDate()}`;
+                      }
 
                       return (
                         <div key={i} className="mb-2">
@@ -312,15 +340,15 @@ export default function Index() {
                               style={{ background: "var(--section-alt-bg)", color: "var(--text-muted)", border: "2px dashed var(--card-border)" }}
                             >
                               <Icon name="Clock" size={16} />
-                              Следующий сеанс в {session.time}
+                              Следующий сеанс завтра в {session.time}
                             </div>
                           ) : (
                             <button
                               className="flex items-center gap-2 px-4 py-2 rounded-xl font-bold text-sm transition-all hover:scale-105 w-full justify-center"
                               style={{
-                                background: isToday || (isSunday && isTodaySunday()) ? "var(--accent-pink)" : "var(--accent-blue)",
+                                background: isSessionToday ? "var(--accent-pink)" : "var(--accent-blue)",
                                 color: "#fff",
-                                boxShadow: isToday || (isSunday && isTodaySunday()) ? "0 4px 14px rgba(233,30,99,0.4)" : "0 4px 14px rgba(33,150,243,0.4)",
+                                boxShadow: isSessionToday ? "0 4px 14px rgba(233,30,99,0.4)" : "0 4px 14px rgba(33,150,243,0.4)",
                               }}
                               onClick={(e) => { e.stopPropagation(); openBuyTicket(film.afishaUrl); }}
                             >
